@@ -1,0 +1,117 @@
+@model HelpDesk.ViewModels.TicketIndexVM
+@{
+    ViewData["Title"] = "Tickets";
+}
+
+<h2>Tickets</h2>
+
+@if (User.IsInRole("Client"))
+{
+    <a asp-action="Create" class="btn btn-primary mb-3">+ New Ticket</a>
+}
+
+<h4>Active Tickets</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Department</th>
+            <th>Client</th>
+            <th>Agent</th>
+            <th>Created</th>
+            <th>Due</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.ActiveTickets.Any())
+        {
+            <tr><td colspan="9" class="text-center text-muted">No active tickets.</td></tr>
+        }
+        @foreach (var t in Model.ActiveTickets)
+        {
+            <tr>
+                <td>@t.Title</td>
+                <td>@t.Status</td>
+                <td>@(t.Priority?.ToString() ?? "-")</td>
+                <td>@(t.Department?.ToString() ?? "-")</td>
+                <td>@t.ClientName</td>
+                <td>@(t.AgentName ?? "-")</td>
+                <td>@t.CreatedAt.ToString("g")</td>
+                <td>
+                    @(t.DueDate?.ToString("g") ?? "-")
+                    @if (t.IsOverdue)
+                    {
+                        <span class="badge bg-danger">Overdue</span>
+                    }
+                </td>
+                <td>
+                    @if ((User.IsInRole("Dispatcher") || User.IsInRole("Admin")) && t.Status != HelpDesk.Models.Enums.TicketStatus.Closed)
+                    {
+                        @if (t.AgentName != null)
+                        {
+                            <a asp-action="Assign" asp-route-id="@t.Id" class="btn btn-sm btn-warning"
+                               onclick="return confirm('Reassign this ticket to a different agent?');">Reassign</a>
+                        }
+                        else
+                        {
+                            <a asp-action="Assign" asp-route-id="@t.Id" class="btn btn-sm btn-warning">Assign</a>
+                        }
+                    }
+                    <a asp-action="Details" asp-route-id="@t.Id" class="btn btn-sm btn-secondary">Details</a>
+                    @if (User.IsInRole("Dispatcher") || User.IsInRole("Admin"))
+                    {
+                        <form asp-action="Delete" asp-route-id="@t.Id" method="post" class="d-inline"
+                              onsubmit="return confirm('Delete this ticket permanently? This cannot be undone.');">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h4 class="mt-4">Closed Tickets</h4>
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Priority</th>
+            <th>Department</th>
+            <th>Client</th>
+            <th>Agent</th>
+            <th>Created</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.ClosedTickets.Any())
+        {
+            <tr><td colspan="7" class="text-center text-muted">No closed tickets.</td></tr>
+        }
+        @foreach (var t in Model.ClosedTickets)
+        {
+            <tr class="text-muted">
+                <td>@t.Title</td>
+                <td>@(t.Priority?.ToString() ?? "-")</td>
+                <td>@(t.Department?.ToString() ?? "-")</td>
+                <td>@t.ClientName</td>
+                <td>@(t.AgentName ?? "-")</td>
+                <td>@t.CreatedAt.ToString("g")</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@t.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                    @if (User.IsInRole("Dispatcher") || User.IsInRole("Admin"))
+                    {
+                        <form asp-action="Delete" asp-route-id="@t.Id" method="post" class="d-inline"
+                              onsubmit="return confirm('Delete this ticket permanently? This cannot be undone.');">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

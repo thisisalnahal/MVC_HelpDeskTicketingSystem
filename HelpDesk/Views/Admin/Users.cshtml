@@ -1,0 +1,58 @@
+﻿@model List<HelpDesk.ViewModels.UserListItemVM>
+@{
+    ViewData["Title"] = "Manage Users";
+    var selectedRole = ViewBag.SelectedRole as string;
+}
+
+<h2>Manage Users</h2>
+
+<form asp-action="Users" method="get" class="mb-3">
+    <div class="form-group">
+        <label>Role</label>
+        <select name="role" class="form-control" onchange="this.form.submit()">
+            <option value="Client" selected="@(selectedRole == "Client")">Client</option>
+            <option value="Agent" selected="@(selectedRole == "Agent")">Agent</option>
+            <option value="Dispatcher" selected="@(selectedRole == "Dispatcher")">Dispatcher</option>
+            @* <option value="Admin" selected="@(selectedRole == "Admin")">Admin</option> *@
+        </select>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            @if (selectedRole == "Agent")
+            {
+                <th>Department</th>
+            }
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr><td colspan="4" class="text-center text-muted">No users in this role.</td></tr>
+        }
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>@u.FullName</td>
+                <td>@u.Email</td>
+                @if (selectedRole == "Agent")
+                {
+                    <td>@(u.Department?.ToString() ?? "-")</td>
+                }
+                <td>
+                    <form asp-action="DeleteUser" method="post" class="d-inline"
+                          onsubmit="return confirm('Delete this account permanently?');">
+                        <input type="hidden" name="id" value="@u.Id" />
+                        <input type="hidden" name="role" value="@selectedRole" />
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,61 @@
+# قائمة المجلدات المطلوبة
+$folders = @(
+    "Areas\Identity",
+    "Data",
+    "Models\Enums",
+    "ViewModels",
+    "Services",
+    "Controllers",
+    "Views\Tickets",
+    "Views\Home",
+    "Views\Shared",
+    "wwwroot"
+)
+
+foreach ($folder in $folders) {
+    if (!(Test-Path $folder)) {
+        New-Item -ItemType Directory -Force -Path $folder | Out-Null
+        Write-Host "Created folder: $folder" -ForegroundColor Green
+    }
+}
+
+# قائمة الملفات المطلوبة
+$files = @(
+    "Data\ApplicationDbContext.cs",
+    "Data\DbInitializer.cs",
+    "Models\ApplicationUser.cs",
+    "Models\Ticket.cs",
+    "Models\TicketComment.cs",
+    "Models\Enums\TicketStatus.cs",
+    "Models\Enums\TicketPriority.cs",
+    "Models\Enums\Department.cs",
+    "ViewModels\TicketCreateVM.cs",
+    "ViewModels\TicketDetailsVM.cs",
+    "ViewModels\TicketAssignVM.cs",
+    "ViewModels\TicketListItemVM.cs",
+    "Services\ITicketAssignmentService.cs",
+    "Services\TicketAssignmentService.cs",
+    "Services\ITicketMaintenanceService.cs",
+    "Services\TicketMaintenanceService.cs",
+    "Controllers\TicketsController.cs",
+    "Controllers\HomeController.cs",
+    "Views\Tickets\Index.cshtml",
+    "Views\Tickets\Details.cshtml",
+    "Views\Tickets\Create.cshtml",
+    "Views\Tickets\Assign.cshtml",
+    "Views\Tickets\_CommentPartial.cshtml",
+    "Views\Shared\_StatusBadge.cshtml"
+)
+
+foreach ($file in $files) {
+    if (!(Test-Path $file)) {
+        $parent = Split-Path $file
+        if (!(Test-Path $parent)) {
+            New-Item -ItemType Directory -Force -Path $parent | Out-Null
+        }
+        New-Item -ItemType File -Force -Path $file | Out-Null
+        Write-Host "Created file: $file" -ForegroundColor Cyan
+    }
+}
+
+Write-Host "Structure check complete!" -ForegroundColor Yellow

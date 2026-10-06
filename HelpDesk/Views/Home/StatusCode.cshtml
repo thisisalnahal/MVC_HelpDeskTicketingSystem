@@ -1,0 +1,9 @@
+﻿@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="text-center mt-5">
+    <h2>@ViewBag.Code</h2>
+    <p>@ViewBag.Message</p>
+    <a asp-controller="Tickets" asp-action="Index" class="btn btn-primary">Back to Tickets</a>
+</div>

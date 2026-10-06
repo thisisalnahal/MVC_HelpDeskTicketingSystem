@@ -1,0 +1,84 @@
+@model HelpDesk.ViewModels.TicketDetailsVM
+@{
+    ViewData["Title"] = "Ticket Details";
+}
+
+<h2>@Model.Title</h2>
+<p>@Model.Description</p>
+
+<p>
+    Status: <strong>@Model.Status</strong>
+    @if (Model.IsOverdue)
+    {
+        <span class="badge bg-danger">Overdue</span>
+    }
+</p>
+<p>Priority: @(Model.Priority?.ToString() ?? "-")</p>
+<p>Department: @(Model.Department?.ToString() ?? "-")</p>
+<p>Client: @Model.ClientName</p>
+<p>Agent: @(Model.AgentName ?? "Unassigned")</p>
+<p>Created: @Model.CreatedAt.ToString("g")</p>
+<p>Due: @(Model.DueDate?.ToString("g") ?? "-")</p>
+
+<hr />
+
+@if (Model.CanStartProgress)
+{
+    <form asp-action="StartProgress" asp-route-id="@Model.Id" method="post" class="d-inline">
+        <button type="submit" class="btn btn-info">Start Progress</button>
+    </form>
+}
+
+@if (Model.CanResolve)
+{
+    <form asp-action="Resolve" asp-route-id="@Model.Id" method="post" class="d-inline">
+        <button type="submit" class="btn btn-success">Mark Resolved</button>
+    </form>
+}
+
+@if (Model.CanClose)
+{
+    <form asp-action="CloseTicket" asp-route-id="@Model.Id" method="post" class="d-inline"
+          onsubmit="return confirm('Close this ticket? This cannot be undone.');">
+        <button type="submit" class="btn btn-dark">Confirm & Close</button>
+    </form>
+}
+
+<hr />
+<h4>Comments</h4>
+
+@foreach (var c in Model.Comments)
+{
+    <div class="card mb-2 @(c.IsInternal ? "bg-warning bg-opacity-25" : "")">
+        <div class="card-body">
+            <strong>@c.AuthorName</strong>
+            @if (c.IsInternal)
+            {
+                <span class="badge bg-warning text-dark">Internal</span>
+            }
+            <small class="text-muted">@c.CreatedAt.ToString("g")</small>
+            <p>@c.CommentText</p>
+        </div>
+    </div>
+}
+
+@if (Model.CanComment)
+{
+    <form asp-action="AddComment" method="post">
+        <input type="hidden" name="TicketId" value="@Model.Id" />
+
+        <div class="form-group">
+            <textarea name="CommentText" class="form-control" rows="3" required></textarea>
+        </div>
+
+        @if (Model.CanPostInternal)
+        {
+            <div class="form-check">
+                <input type="checkbox" name="IsInternal" value="true" class="form-check-input" id="isInternal" />
+                <label class="form-check-label" for="isInternal">Internal note (not visible to client)</label>
+            </div>
+        }
+
+        <button type="submit" class="btn btn-primary mt-2">Post Comment</button>
+    </form>
+}

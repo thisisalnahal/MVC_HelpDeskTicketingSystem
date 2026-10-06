@@ -1,0 +1,55 @@
+@model HelpDesk.ViewModels.TicketAssignVM
+@{
+    ViewData["Title"] = Model.IsReassignment ? "Reassign Ticket" : "Assign Ticket";
+}
+
+<h2>@(Model.IsReassignment ? "Reassign Ticket" : "Assign Ticket")</h2>
+
+<p><strong>@Model.Title</strong></p>
+<p>@Model.Description</p>
+
+<form asp-action="Assign" asp-route-id="@Model.TicketId" method="get" class="mb-3">
+    <div class="form-group">
+        <label>Department</label>
+        <select name="department" class="form-control" onchange="this.form.submit()">
+            @foreach (var dept in Enum.GetValues<HelpDesk.Models.Enums.Department>())
+            {
+                <option value="@dept" selected="@(dept == Model.Department)">@dept</option>
+            }
+        </select>
+    </div>
+</form>
+
+<form asp-action="Assign" method="post">
+    <input type="hidden" asp-for="TicketId" />
+    <input type="hidden" asp-for="IsReassignment" />
+    <input type="hidden" asp-for="Department" />
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    @if (Model.IsReassignment)
+    {
+        <div class="form-group">
+            <label asp-for="SelectedAgentId">Assign to</label>
+            <select asp-for="SelectedAgentId" class="form-control">
+                @foreach (var agent in Model.AvailableAgents)
+                {
+                    <option value="@agent.Id">@agent.FullName (@agent.ActiveTicketCount active)</option>
+                }
+            </select>
+        </div>
+    }
+
+    <div class="form-group">
+        <label asp-for="Priority"></label>
+        <select asp-for="Priority" class="form-control">
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+            <option value="Urgent">Urgent</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        @(Model.IsReassignment ? "Reassign" : "Assign")
+    </button>
+</form>
